@@ -1,0 +1,77 @@
+#!/bin/sh
+######################################
+#
+# vmstat_logger service
+#
+# Daniel Korel | 2015
+#
+# Auto Start:
+# Ubuntu: /etc/update-rc.d vmstat_logger defaults
+# CentOS: chkconfig vmstat_logger on
+#
+######################################
+
+### BEGIN INIT INFO
+# Provides:          vmstat_logger
+# Required-Start:    $local_fs $network  $syslog
+# Required-Stop:     $local_fs $network $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Description:       pipes vmstat output through filters and outputs to /var/log/vmstat
+### END INIT INFO
+
+NAME="vmstat logger"
+RUNAS=root
+PIDFILE=/var/run/vmstat.pid
+
+start() {
+  if [ -f $PIDFILE ] ; then
+    echo 'Service already running' >&2
+    return 1
+  fi
+  echo 'Starting '$NAME >&2
+  /bin/vmstat 10 -n | /bin/grep --line-buffered -v "free" | /bin/grep --line-buffered -v "procs" > /var/log/vmstat &  
+  jobs -p > $PIDFILE
+  echo $NAME' started' >&2
+}
+
+stop() {
+  if [ ! -f "$PIDFILE" ] || ! kill -0 $(cat "$PIDFILE"); then
+    echo $NAME' not running' >&2
+    return 1
+  fi
+  echo 'Stopping '$NAME' service…' >&2
+  kill -15 $(cat "$PIDFILE") && rm -f "$PIDFILE"
+  echo $NAME' stopped' >&2
+}
+
+uninstall() {
+  echo -n "Are you really sure you want to uninstall this service? That cannot be undone. [yes|No] "
+  local SURE
+  read SURE
+  if [ "$SURE" = "yes" ]; then
+    stop
+    rm -f "$PIDFILE"
+    echo "Notice: log file is not be removed: '$LOGFILE'" >&2
+    update-rc.d -f vmstat_logger remove
+    rm -fv "$0"
+  fi
+}
+
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  uninstall)
+    uninstall
+    ;;
+  restart)
+    stop
+    start
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|uninstall}"
+esac
