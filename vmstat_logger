@@ -7,7 +7,8 @@
 #
 # Auto Start:
 # Ubuntu: /etc/update-rc.d vmstat_logger defaults
-# CentOS: chkconfig vmstat_logger on
+# CentOS: chkconfig --add vmstat_logger
+#         chkconfig vmstat_logger on
 #
 ######################################
 
