@@ -24,6 +24,7 @@
 NAME="vmstat logger"
 RUNAS=root
 PIDFILE=/var/run/vmstat.pid
+LOGFILE="/var/log/vmstat.log"
 
 start() {
   if [ -f $PIDFILE ] ; then
@@ -31,7 +32,7 @@ start() {
     return 1
   fi
   echo 'Starting '$NAME >&2
-  /bin/vmstat 10 -n | /bin/grep --line-buffered -v "free" | /bin/grep --line-buffered -v "procs" > /var/log/vmstat &  
+  vmstat 10 -n | grep --line-buffered -v "free" | grep --line-buffered -v "procs" >> $LOGFILE &
   jobs -p > $PIDFILE
   echo $NAME' started' >&2
 }
@@ -53,7 +54,7 @@ uninstall() {
   if [ "$SURE" = "yes" ]; then
     stop
     rm -f "$PIDFILE"
-    echo "Notice: log file is not be removed: '$LOGFILE'" >&2
+    echo "Notice: log file will not be removed: '$LOGFILE'" >&2
     update-rc.d -f vmstat_logger remove
     rm -fv "$0"
   fi
