@@ -18,3 +18,6 @@ At one line every 10 seconds it would take approx a year for it to grow to < 100
 ## More Information:
 More detailed blog post with an explanation of how everything ties together:
  - http://korel.com.au/monitor-your-systems-with-elk-and-vmstat-logger/
+
+## Dashboard
+You should be able to import dashboard.json into Kibana. It should contain all visualizations and the dashboard.
